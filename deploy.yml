@@ -1,12 +1,18 @@
 ---
-- hosts: localhost
-  connection: local
+- hosts: appserver
   become: yes
 
   tasks:
 
+    - name: Pull latest image
+      shell: docker pull 1999pratham/flask-cicd:latest
+
     - name: Stop old container
       shell: docker rm -f flask-app || true
 
-    - name: Run new container
-      shell: docker run -d --name flask-app -p 5000:5000 flask-app:latest
+    - name: Start new container
+      shell: |
+        docker run -d \
+        --name flask-app \
+        -p 5000:5000 \
+        1999pratham/flask-cicd:latest

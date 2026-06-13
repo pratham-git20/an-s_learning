@@ -1,34 +1,31 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "1999pratham/flask-cicd"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+    }
+
     stages {
 
-        stage('Clone') {
+        stage('Build Image') {
             steps {
-                echo 'Source code available'
+                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+                sh 'docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Push Image') {
             steps {
-                sh 'docker build -t flask-app:latest .'
+                sh 'docker push $IMAGE_NAME:$IMAGE_TAG'
+                sh 'docker push $IMAGE_NAME:latest'
             }
         }
 
         stage('Deploy') {
             steps {
-                sh 'ansible-playbook deploy.yml'
+                sh 'ansible-playbook -i inventory.ini deploy.yml'
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'Deployment Successful'
-        }
-
-        failure {
-            echo 'Deployment Failed'
         }
     }
 }
